@@ -17,13 +17,32 @@ export class AuthService {
    lui pousser des valeurs avec la méthode .next(value)
   */
   user:BehaviorSubject<User> = new BehaviorSubject(null);
-  urlAPI:string = 'http://localhost:3000/user';
+  urlAPI:string = 'http://localhost:3001/user';
+  token:string;
 
   constructor(private http:HttpClient) { 
-    //Quand le service est créé, il va vérifier dans le localStorage si un user s'y trouve déjà, et si oui, il le récupère et le pousse dans le flux de user
-    this.user.next(JSON.parse(localStorage.getItem('user')));
+    this.init()
   }
 
+  init() {
+    //Quand le service est créé, il va vérifier dans le localStorage si un user s'y trouve déjà, et si oui, il le récupère et le pousse dans le flux de user
+    this.token = localStorage.getItem('token');
+    if(this.token) {
+      
+      //On récupère la date d'expiration du token
+      let expiration = parseInt(this.token.split('|')[1]);
+      //On vérifie si le token est expiré
+      if(expiration > new Date().getTime()){
+        //Si non, on va chercher le user correspondant à
+        //ce token
+        this.getByToken(this.token).subscribe((user) =>{
+          this.user.next(user);
+          }
+        );
+      }
+    }  
+     
+  }
 
   login(username:string,pass:string):Observable<boolean> {
     
@@ -33,7 +52,7 @@ export class AuthService {
         //On stock le user en localStorage (c'est pas 
         //très très bien de faire ça, en soit on voudrait
         //plutôt stocker juste une clef token en localStorage et pas tout le user)
-        localStorage.setItem('user', JSON.stringify(users[0]));
+        localStorage.setItem('token', users[0].token);
         //On pousse le user dans le flux de User qu'est notre BehaviorSubject
         this.user.next(users[0]);
         return true;
@@ -42,17 +61,28 @@ export class AuthService {
     });
   }
 
-    logout():void {
-    //Au logout, on supprime le user des localStorage
-    localStorage.removeItem('user');
+  logout():void {
+    //Au logout, on supprime le token des localStorage
+    localStorage.removeItem('token');
     this.user.next(null);
   }
 
-  signup(user:User):Observable<User> {
+  signup(user:User): Observable<User> {
     return this.http.post<User>(this.urlAPI, user);
   }
 
-  getByUsername(username:String):Observable<User>{
-  return this.http.get<User>(this.urlAPI+'?username=' +username);
+  getByUsername(username:string):Observable<User[]> {
+    return this.http.get<User[]>(this.urlAPI+'?username='+username);
   }
+
+  getByToken(token:string):Observable<User> {
+    return this.http.get<User[]>(this.urlAPI+'?token='+token)
+    .map((users) => {
+      if(users.length === 1) {
+        return users[0];
+      }
+      return null
+    });
+  }
+
 }
