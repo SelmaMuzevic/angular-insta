@@ -17,7 +17,7 @@ export class AuthService {
    lui pousser des valeurs avec la méthode .next(value)
   */
   user:BehaviorSubject<User> = new BehaviorSubject(null);
-  urlAPI:string = 'http://localhost:3001/user';
+  urlAPI:string = 'http://localhost:3000/user';
   token:string;
 
   constructor(private http:HttpClient) { 
@@ -37,12 +37,14 @@ export class AuthService {
         //ce token
         this.getByToken(this.token).subscribe((user) =>{
           this.user.next(user);
-          }
+        }
         );
       }
     }  
-     
+    
+    
   }
+
 
   login(username:string,pass:string):Observable<boolean> {
     

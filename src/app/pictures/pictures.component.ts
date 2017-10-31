@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+mport { Component, OnInit } from '@angular/core';
 import { PictureService } from '../shared/picture.service';
 import { Picture } from '../shared/picture';
 import { Observable } from 'rxjs/Observable';
@@ -45,7 +45,5 @@ export class PicturesComponent implements OnInit {
     //une string de caractères)
     reader.readAsDataURL(this.fichier[0]);
   }
-
-
 
 }

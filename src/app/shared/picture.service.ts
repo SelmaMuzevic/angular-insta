@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class PictureService {
-  urlAPI:string = 'http://localhost:3001/picture';
+  urlAPI:string = 'http://localhost:3000/picture';
 
   constructor(private http:HttpClient) { }
 
